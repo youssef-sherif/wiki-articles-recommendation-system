@@ -11,6 +11,7 @@ class Document:
         :param lines:
         """
         self.articles = []
+        self.n_grams_vector = []
 
         raw_article = ""
         i = 0
@@ -24,19 +25,20 @@ class Document:
 
     def pre_process(self):
         for article in self.articles:
-            article.tokenize().remove_stop_words().stem()
+            article.tokenize().remove_stop_words().lemmatize()
 
-    def build_dictionaries(self):
+    def build_n_grams_dictionaries(self, n=2):
         """
             loops on all articles and builds dictionaries for each.
         :return: None
         """
         for article in self.articles:
+            article.n_grams.append(article.get_n_grams(n))
             article.build_dictionary()
 
-    def to_array(self):
-        texts = [article.tokens for article in self.articles]
-        return texts
+    def build_n_grams_vector(self, n=2):
+        for article in self.articles:
+            self.n_grams_vector.append(article.get_n_grams(n))
 
     def occurrence(self, word):
         count = 0

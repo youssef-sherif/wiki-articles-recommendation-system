@@ -2,6 +2,8 @@ from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
+from nltk.util import ngrams
+from collections import Counter
 
 wordnet_lemmatizer = WordNetLemmatizer()
 english_stemmer = SnowballStemmer('english')
@@ -13,6 +15,7 @@ class Article:
         self.raw = raw
         self.id = id
         self.tokens = []
+        self.n_grams = []
         self.freq_dict = {}
 
     def tokenize(self):
@@ -79,3 +82,16 @@ class Article:
 
     def tf(self, word):
         return self.freq_dict[word] / self.freq_dict.__len__()
+
+    def get_n_grams(self, n=2):
+        n_grams = [' '.join(grams) for grams in ngrams(self.tokens, n)]
+        n_gram_counts = Counter(n_grams)
+
+        most_common_n_grams = n_gram_counts.most_common(10)
+
+        n_grams = []
+        for i in most_common_n_grams:
+            if i[1] > 1:
+                n_grams.append(i[0])
+
+        return n_grams
