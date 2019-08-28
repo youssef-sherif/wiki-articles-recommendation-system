@@ -34,6 +34,10 @@ class Document:
         for article in self.articles:
             article.build_dictionary()
 
+    def to_array(self):
+        texts = [article.tokens for article in self.articles]
+        return texts
+
     def occurrence(self, word):
         count = 0
         for article in self.articles:
