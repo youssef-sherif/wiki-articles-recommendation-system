@@ -1,13 +1,16 @@
 from Document import Document
 from gensim.models import Word2Vec
+from gensim.models import TfidfModel
+from gensim.corpora import Dictionary
 from re import match
 from pprint import pprint
 from gensim import corpora
 from nltk import cluster
 from sklearn.cluster import KMeans
 from nltk.cluster import euclidean_distance
+from Kmeans import kmeans
 import numpy as np
-from kmeans import k_means
+from pprint import pprint
 
 
 def read_raw_data(path):
@@ -29,7 +32,6 @@ lines = read_raw_data('./wikitext-2-raw-v1/wikitext-2-raw/wiki.train.raw')
 document = Document(lines)
 document.pre_process()
 document.build_n_grams_vector(2)
-
 
 # print("Some Examples: \n")
 #
@@ -54,10 +56,32 @@ document.build_n_grams_vector(2)
 #
 # # Create CBOW model
 
-model = Word2Vec(document.n_grams_vector, min_count = 1, size = 300, window = 5)
+# model = Word2Vec(document.n_grams_vector, min_count = 1, size = 300, window = 5)
+# x = np.asmatrix(model.syn1neg)
+# print(model.syn1neg.shape)
+# print(x.shape)
+dct = Dictionary(document.n_grams_vector)
+corpus = [dct.doc2bow(line) for line in document.n_grams_vector]  # convert corpus to BoW format
+model = TfidfModel(corpus)
+vector = []
+for i in corpus:
+    # vector.append(model[i])
+    x = model[i]
+    z = 0
+    for n in x:
+        z += n[1]
 
-vectors = np.array(document.n_grams_vector)
-
-centroids = np.array([document.n_grams_vector[0], document.n_grams_vector[1], document.n_grams_vector[2]])
-
-k_means(3, vectors, centroids, model.n_similarity)
+    z = np.array([z])
+    vector.append(z)
+arr = np.array(vector)
+print(arr.shape)
+km = kmeans(arr)
+new_centroids, clusters, error, iter_num = kmeans.kmeans(km.dataset)
+for n in clusters:
+    print(n)
+# print(document.n_grams_vector)
+# vectors = np.array(document.n_grams_vector)
+#
+# centroids = np.array([document.n_grams_vector[0], document.n_grams_vector[1], document.n_grams_vector[2]])
+#
+# k_means(3, vectors, centroids, model.n_similarity)
