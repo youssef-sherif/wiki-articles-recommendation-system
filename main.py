@@ -1,5 +1,6 @@
 from Document import Document
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec, TfidfModel
+from gensim.corpora import Dictionary
 from re import match
 from pprint import pprint
 from gensim import corpora
@@ -54,10 +55,9 @@ document.build_n_grams_vector(2)
 #
 # # Create CBOW model
 
-model = Word2Vec(document.n_grams_vector, min_count = 1, size = 300, window = 5)
+model = Word2Vec(document.n_grams_vector, min_count=1, size=50, workers=3, window=3, sg=1)
 
-vectors = np.array(document.n_grams_vector)
-
-centroids = np.array([document.n_grams_vector[0], document.n_grams_vector[1], document.n_grams_vector[2]])
-
-k_means(3, vectors, centroids, model.n_similarity)
+dict = Dictionary(document.n_grams_vector)
+corpus = [dict.doc2bow(line) for line in document.n_grams_vector]
+tfidf_model = TfidfModel(corpus)
+vector = np.array(corpus)
