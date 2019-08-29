@@ -84,6 +84,8 @@ class KMeansRecommend:
                 all_recommended.append(i)
             i += 1
 
+        print(all_recommended)
+
         recommended_article_ids = []
         for i in range(0, 3):
             random_article = random.choice(all_recommended)

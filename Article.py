@@ -78,4 +78,6 @@ class Article:
             if i[1] > 1:
                 n_grams.append(i[0])
 
+        print(n_grams)
+        
         return n_grams
