@@ -11,11 +11,11 @@ english_stemmer = SnowballStemmer('english')
 
 class Article:
 
-    def __init__(self, raw, id):
+    def __init__(self, title, raw):
+        self.title = title
         self.raw = raw
-        self.id = id
         self.tokens = []
-        self.n_grams = []
+        self.id = None
         self.freq_dict = {}
 
     def tokenize(self):
@@ -24,8 +24,7 @@ class Article:
         :return: self
         """
         tokenizer = RegexpTokenizer(r'\w+')
-        self.raw = self.raw.lower()
-        self.tokens = tokenizer.tokenize(self.raw)
+        self.tokens = tokenizer.tokenize(self.raw.lower())
 
         return self
 
@@ -67,21 +66,6 @@ class Article:
         self.tokens = lemmatized_words
 
         return self
-
-    def build_dictionary(self):
-        """
-            builds a dictionary with article words as key and words occurrence in the article as value.
-        :return: None as it updates freq_dict
-        """
-
-        for token in self.tokens:
-            if token in self.freq_dict:
-                self.freq_dict[token] += 1
-            else:
-                self.freq_dict[token] = 1
-
-    def tf(self, word):
-        return self.freq_dict[word] / self.freq_dict.__len__()
 
     def get_n_grams(self, n=2):
         n_grams = [' '.join(grams) for grams in ngrams(self.tokens, n)]

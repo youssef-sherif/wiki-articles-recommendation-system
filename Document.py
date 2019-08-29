@@ -1,85 +1,56 @@
 from Article import Article
 from math import log
+from re import match
+from pprint import pprint
 
 
 class Document:
 
-    def __init__(self, lines):
+    def __init__(self, path):
         """
             group articles together line by line until empty line is found.
-            creates article objects and assigns an incremental id for each article.
         :param lines:
         """
+
+        titles = {}
+
+        file = open(path, 'r')
+
+        # Read the file line by line and exclude titles that are in the form ( = = = A title = = = )
+        current_title = ""
+        lines = []
+        for line in file.readlines():
+            if match(r"([\s=\s]+)[\W+]+([\s=\s]+)", line):
+                current_title = line
+                lines = []
+            else:
+                lines.append(line)
+                titles[current_title] = lines
+
+        file.close()
+
         self.articles = []
-        self.n_grams_vector = []
+        self.n_grams = []
 
         raw_article = ""
         i = 0
-        for line in lines:
-            raw_article += line
-            if line.isspace() and not raw_article.isspace():
-                i += 1
-                article = Article(raw_article, i)
-                self.articles.append(article)
-                raw_article = ""
+        for title in titles:
+            for line in titles[title]:
+                raw_article += line
+                if line.isspace() and not raw_article.isspace():
+                    article = Article(title, raw_article)
+                    article.id = i
+                    self.articles.append(article)
+                    raw_article = ""
+                    i += 1
 
     def pre_process(self):
         for article in self.articles:
             article.tokenize().remove_stop_words().lemmatize()
 
-    def build_n_grams_dictionaries(self, n=2):
-        """
-            loops on all articles and builds dictionaries for each.
-        :return: None
-        """
+    def build_n_grams(self, n=2):
         for article in self.articles:
-            article.n_grams.append(article.get_n_grams(n))
-            article.build_dictionary()
+            self.n_grams.append(article.get_n_grams(n))
 
-    def build_n_grams_vector(self, n=2):
-        for article in self.articles:
-            self.n_grams_vector.append(article.get_n_grams(n))
-
-    def occurrence(self, word):
-        count = 0
-        for article in self.articles:
-            for token in article.tokens:
-                if word == token:
-                    count += 1
-
-        return count
-
-    def idf(self, word):
-        return log(self.articles.__len__() / self.occurrence(word), 2)
-
-    def tf(self, word):
-        """
-            calculates article.tf(word) only if the article contains the word and creates a dictionary with article.id
-            as key and tf as value.
-        :param word:
-        :return:
-        """
-        tf_results = {}
-
-        for article in self.articles:
-            if word in article.freq_dict:
-                tf_results[article.id] = article.tf(word)
-
-        return tf_results
-
-    def tf_idf(self, word):
-        """
-            calculates article.tf(word) only if the article contains the word and creates a dictionary with article.id
-            as key and tf * idf as value.
-        :param word:
-        :return:
-        """
-
-        tf_idf_results = {}
-        idf_result = self.idf(word)
-
-        for article in self.articles:
-            if word in article.freq_dict:
-                tf_idf_results[article.id] = article.tf(word) * idf_result
-
-        return tf_idf_results
+    def get_article(self, id):
+        return self.articles[id]
