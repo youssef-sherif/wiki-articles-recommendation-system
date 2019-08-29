@@ -32,6 +32,21 @@ def read_article_by_title(path, title):
     return raw_article
 
 
+def get_vector(corpus, model):
+    vector = []
+    for c in corpus:
+        vector1 = []
+        m = model[c]
+        for i in range(0, 100):
+            if i < len(m) - 1:
+                vector1.append(m[i][1])
+            else:
+                vector1.append(0)
+        vector.append(np.array(vector1))
+
+    return np.array(vector)
+
+
 def get_sum_vector(corpus, model):
     vector = []
     for c in corpus:
@@ -40,6 +55,7 @@ def get_sum_vector(corpus, model):
         for n in m:
             sum += n[1]
         vector.append(np.array([sum]))
+
     return np.array(vector)
 
 
@@ -49,14 +65,17 @@ document.build_n_grams(2)
 
 vocab = Dictionary(document.n_grams)
 corpus = [vocab.doc2bow(line) for line in document.n_grams]  # convert corpus to BoW format
+
 model = TfidfModel(corpus)
 
-arr = get_sum_vector(corpus=corpus, model=model)
+vector = get_vector(corpus=corpus, model=model)
 
-km = KMeansRecommend(data=arr)
+print(vector)
+
+km = KMeansRecommend(data=vector)
 km.k_means()
 
-title = "Plot summary"
+title = "Life"
 
 raw = read_article_by_title('./wikitext-2-raw-v1/wikitext-2-raw/wiki.test.raw', title)
 article = Article(title=title, raw=raw)
@@ -66,6 +85,8 @@ recommended_article_ids = km.recommend(article)
 recommended_articles = []
 for recommended_article_id in recommended_article_ids:
     recommended_articles.append(document.get_article(recommended_article_id))
+
+print("= = RECOMMENDED ARTICLES = =")
 
 for recommended_article in recommended_articles:
     print(recommended_article.title)
