@@ -47,11 +47,6 @@ document = Document('./wikitext-2-raw-v1/wikitext-2-raw/wiki.train.raw')
 document.pre_process()
 document.build_n_grams(2)
 
-# model = Word2Vec(document.n_grams_vector, min_count = 1, size = 300, window = 5)
-# x = np.asmatrix(model.syn1neg)
-# print(model.syn1neg.shape)
-# print(x.shape)
-
 vocab = Dictionary(document.n_grams)
 corpus = [vocab.doc2bow(line) for line in document.n_grams]  # convert corpus to BoW format
 model = TfidfModel(corpus)
